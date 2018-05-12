@@ -27,6 +27,7 @@ android {
 // all APIs : https://github.com/toddmotto/public-apis
 // Simple API : https://github.com/workforce-data-initiative/skills-api/wiki/API-Overview
 // Pagination API : https://chroniclingamerica.loc.gov/about/api/
+// Github users API : https://api.github.com/users?since=0&per_page=20
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

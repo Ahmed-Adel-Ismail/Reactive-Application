@@ -19,9 +19,10 @@ import io.reactivex.subjects.BehaviorSubject;
 public class MainViewModel extends ViewModel {
 
     private static final String EMPTY_STRING = "";
+
     final BehaviorSubject<String> jobSuggestionName = BehaviorSubject.createDefault(EMPTY_STRING);
-    final BehaviorSubject<Boolean> processing = BehaviorSubject.createDefault(false);
     final BehaviorSubject<List<JobSuggestion>> jobSuggestions = BehaviorSubject.createDefault(new ArrayList<>());
+    private final BehaviorSubject<Boolean> processing = BehaviorSubject.createDefault(false);
     private final CompositeDisposable disposables = new CompositeDisposable();
 
 
@@ -47,18 +48,20 @@ public class MainViewModel extends ViewModel {
 
     @NonNull
     private Disposable invokeInsertJobSuggestion() {
-        return jobSuggestionName.share()
+        processing.onNext(true);
+        return Single.just(jobSuggestionName)
                 .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.computation())
+                .observeOn(Schedulers.io())
+                .map(BehaviorSubject::getValue)
                 .filter(name -> !EMPTY_STRING.equals(name))
-                .flatMapSingle(Single::just)
                 .map(this::jobSuggestion)
                 .doFinally(() -> jobSuggestionName.onNext(EMPTY_STRING))
                 .doFinally(() -> processing.onNext(false))
-                .subscribe(this::updateDatabase);
+                .subscribe(this::insertJobSuggestionIntoDatabase);
+
     }
 
-    private void updateDatabase(JobSuggestion jobSuggestion) {
+    private void insertJobSuggestionIntoDatabase(JobSuggestion jobSuggestion) {
         AppDatabase.getInstance().getJobSuggestions().insert(jobSuggestion);
     }
 

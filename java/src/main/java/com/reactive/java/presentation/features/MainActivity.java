@@ -25,30 +25,21 @@ import io.reactivex.subjects.BehaviorSubject;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final CompositeDisposable disposables;
-    private final Observable<EditText> jobName;
-    private final Observable<Button> insert;
-    private final Observable<TextView> jobsCount;
-
-    public MainActivity() {
-        disposables = new CompositeDisposable();
-        jobName = Observable.defer(() -> Observable.just((EditText) findViewById(R.id.job_name)));
-        insert = Observable.defer(() -> Observable.just((Button) findViewById(R.id.insert_job_name)));
-        jobsCount = Observable.defer(() -> Observable.just((TextView) findViewById(R.id.jobs_count)));
-    }
+    private final CompositeDisposable disposables = new CompositeDisposable();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        disposables.add(bindJobName(viewModel.jobSuggestionName));
-        disposables.add(bindInsert(viewModel));
+        disposables.add(bindJobNameEditText(viewModel.jobSuggestionName));
+        disposables.add(bindInsertButton(viewModel));
         disposables.add(bindJobsCount(viewModel.jobSuggestions));
     }
 
-    private Disposable bindJobName(BehaviorSubject<String> jobSuggestionName) {
-        return jobName.flatMap(RxTextView::textChangeEvents)
+    private Disposable bindJobNameEditText(BehaviorSubject<String> jobSuggestionName) {
+        EditText jobName = findViewById(R.id.job_name);
+        return RxTextView.textChangeEvents(jobName)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .debounce(500, TimeUnit.MILLISECONDS)
@@ -56,8 +47,9 @@ public class MainActivity extends AppCompatActivity {
                 .subscribe(jobSuggestionName::onNext);
     }
 
-    private Disposable bindInsert(MainViewModel viewModel) {
-        return insert.flatMap(RxView::clicks)
+    private Disposable bindInsertButton(MainViewModel viewModel) {
+        Button insert = findViewById(R.id.insert_job_name);
+        return RxView.clicks(insert)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMapMaybe(object -> viewModel.insertJobSuggestionName())
@@ -65,34 +57,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Disposable bindJobsCount(BehaviorSubject<List<JobSuggestion>> jobSuggestions) {
-        return Observable.combineLatest(
-                jobsCountView(),
-                jobSuggestionsSize(jobSuggestions),
-                this::jobsCountUpdater)
-                .subscribe();
-
-
-    }
-
-    private Observable<Consumer<? super CharSequence>> jobsCountView() {
-        return jobsCount
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .map(RxTextView::text);
-
-    }
-
-    private Observable<String> jobSuggestionsSize(BehaviorSubject<List<JobSuggestion>> jobSuggestions) {
+        TextView jobsCountTextView = findViewById(R.id.jobs_count);
         return jobSuggestions.share()
                 .map(List::size)
                 .map(String::valueOf)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread());
-    }
-
-    private Boolean jobsCountUpdater(Consumer<? super CharSequence> textChanger, String jobSuggestion) throws Exception {
-        textChanger.accept(jobSuggestion);
-        return true;
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(jobsCountTextView::setText);
     }
 
     @Override
