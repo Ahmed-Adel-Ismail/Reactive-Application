@@ -6,8 +6,9 @@ import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
 import com.reactive.java.App;
+import com.reactive.java.entities.JobSuggestion;
 
-@Database(entities = {JobSuggestionsDao.class}, version = 1)
+@Database(entities = {JobSuggestion.class}, version = 1)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static final String NAME = "AppDatabase.db";
