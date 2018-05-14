@@ -15,7 +15,7 @@ public class RetrofitMocks {
         return Observable.fromIterable(usersData.getUsers())
                 .filter(user -> user.getAge() > age)
                 .toList()
-                .delay(200, TimeUnit.MILLISECONDS)
+                .delay(2, TimeUnit.SECONDS)
                 .flatMapObservable(Observable::just);
     }
 }
