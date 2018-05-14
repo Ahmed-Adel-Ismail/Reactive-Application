@@ -1,6 +1,5 @@
 package com.reactive.appone.features.login;
 
-import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProviders;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,8 +13,6 @@ import com.reactive.appone.R;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.BehaviorSubject;
 
 public class LoginActivity extends AppCompatActivity {
@@ -27,12 +24,12 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         LoginViewModel viewModel = ViewModelProviders.of(this).get(LoginViewModel.class);
-        initialzeLoginButton(viewModel);
+        initializeLoginButton(viewModel);
         disposables.add(bindLoadingState(viewModel.loadingState));
         disposables.add(bindRequestLoginResult(viewModel.requeustLoginResult));
     }
 
-    private void initialzeLoginButton(LoginViewModel viewModel) {
+    private void initializeLoginButton(LoginViewModel viewModel) {
         Button loginButton = findViewById(R.id.button);
         loginButton.setOnClickListener(view -> viewModel.requestLogin("",""));
     }

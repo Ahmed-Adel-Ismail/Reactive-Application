@@ -8,7 +8,7 @@ import android.content.Context;
 import com.reactive.java.App;
 import com.reactive.java.entities.JobSuggestion;
 
-@Database(entities = {JobSuggestion.class}, version = 1)
+@Database(entities = {JobSuggestion.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static final String NAME = "AppDatabase.db";
